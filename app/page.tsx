@@ -571,7 +571,7 @@ export default function Home() {
             <i />
             <i />
           </span>
-          <span>图准 · 本地图片工具</span>
+          <span>本地图片工具</span>
         </div>
         <h1>
           尺寸统一，
@@ -858,7 +858,6 @@ export default function Home() {
       )}
 
       <footer>
-        <span>图准</span>
         <p>本地处理 · 简体中文与英文 OCR · 支持 JPG / PNG / WebP</p>
       </footer>
 

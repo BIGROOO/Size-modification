@@ -30,7 +30,8 @@ test("server-renders the finished image workspace", async () => {
 
   const html = await response.text();
   assert.match(html, /<html lang="zh-CN">/);
-  assert.match(html, /<title>图准 · 图片尺寸与文案检查<\/title>/);
+  assert.match(html, /<title>图片尺寸与文案检查<\/title>/);
+  assert.doesNotMatch(html, /\u56fe\u51c6/);
   assert.match(html, /尺寸统一，/);
   assert.match(html, /重复文案一眼看见。/);
   assert.match(html, /800 × 800/);

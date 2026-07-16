@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const origin = `${protocol}://${host}`;
 
   return {
-    title: "图准 · 图片尺寸与文案检查",
+    title: "图片尺寸与文案检查",
     description: "在浏览器本地统一图片尺寸、识别重复文案，并安全写回原文件夹。",
     openGraph: {
       title: "图片尺寸与文案检查",
