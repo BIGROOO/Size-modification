@@ -25,7 +25,6 @@ interface LocalFileHandle {
 
 interface LocalDirectoryHandle {
   queryPermission(options?: { mode?: "read" | "readwrite" }): Promise<PermissionState>;
-  requestPermission(options?: { mode?: "read" | "readwrite" }): Promise<PermissionState>;
   values(): AsyncIterableIterator<
     LocalFileHandle | { kind: "directory"; name: string }
   >;
@@ -424,7 +423,7 @@ export default function Home() {
     try {
       const directory = await pickerWindow.showDirectoryPicker({
         startIn: "desktop",
-        mode: "read",
+        mode: "readwrite",
       });
       const selected: Array<{ file: File; handle: LocalFileHandle }> = [];
       let ignored = 0;
@@ -452,7 +451,7 @@ export default function Home() {
       await processFiles(selected);
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
-      setNotice("无法读取这个文件夹，请确认已授予读取权限后重试。");
+      setNotice("无法打开这个文件夹，请在浏览器提示中允许读取和编辑后重试。");
     }
   }
 
@@ -521,28 +520,24 @@ export default function Home() {
     return () => window.clearTimeout(timer);
   }, [background, jobs.length, processing, targetHeight, targetWidth]);
 
-  async function ensureWritePermission(): Promise<boolean> {
+  async function hasWritePermission(): Promise<boolean> {
     const directory = directoryHandleRef.current;
     if (!directory) return false;
 
-    if ((await directory.queryPermission({ mode: "readwrite" })) === "granted") {
-      return true;
-    }
-
-    return (await directory.requestPermission({ mode: "readwrite" })) === "granted";
+    return (await directory.queryPermission({ mode: "readwrite" })) === "granted";
   }
 
   async function saveResults() {
     if (folderMode) {
       try {
-        if (!(await ensureWritePermission())) {
+        if (!(await hasWritePermission())) {
           setShowConfirm(false);
-          setNotice("未获得文件夹编辑权限，没有覆盖任何图片。请再次点击“覆盖原图”并允许编辑。");
+          setNotice("文件夹编辑权限已失效，没有覆盖任何图片。请重新选择文件夹并在浏览器提示中允许编辑。");
           return;
         }
       } catch {
         setShowConfirm(false);
-        setNotice("无法申请文件夹编辑权限，没有覆盖任何图片。请重新点击“覆盖原图”后重试。");
+        setNotice("无法检查文件夹编辑权限，没有覆盖任何图片。请重新选择文件夹后重试。");
         return;
       }
     }

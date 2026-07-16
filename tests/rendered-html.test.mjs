@@ -52,12 +52,17 @@ test("keeps processing local and includes the required safety flow", async () =>
 
   assert.match(page, /showDirectoryPicker/);
   assert.match(page, /startIn:\s*"desktop"/);
-  assert.match(page, /mode:\s*"read"/);
+  assert.match(page, /mode:\s*"readwrite"/);
   assert.match(page, /queryPermission\(\{ mode: "readwrite" \}\)/);
-  assert.match(page, /requestPermission\(\{ mode: "readwrite" \}\)/);
-  assert.doesNotMatch(page, /showDirectoryPicker\(\{ mode: "readwrite"/);
+  assert.doesNotMatch(page, /requestPermission/);
+  assert.doesNotMatch(page, /mode:\s*"read",/);
   assert.doesNotMatch(page, /indexedDB/);
   assert.match(page, /createWritable/);
+  assert.match(page, /文件夹编辑权限已失效，没有覆盖任何图片/);
+  const permissionCheckIndex = page.indexOf("if (!(await hasWritePermission()))");
+  const firstWriteIndex = page.indexOf("const writable = await job.handle.createWritable()");
+  assert.ok(permissionCheckIndex >= 0);
+  assert.ok(firstWriteIndex > permissionCheckIndex);
   assert.match(page, /createImageBitmap/);
   assert.match(page, /await import\("tesseract\.js"\)/);
   assert.match(page, /\["chi_sim", "eng"\]/);
