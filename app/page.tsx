@@ -24,9 +24,16 @@ interface LocalFileHandle {
 }
 
 interface LocalDirectoryHandle {
+  queryPermission(options?: { mode?: "read" | "readwrite" }): Promise<PermissionState>;
+  requestPermission(options?: { mode?: "read" | "readwrite" }): Promise<PermissionState>;
   values(): AsyncIterableIterator<
     LocalFileHandle | { kind: "directory"; name: string }
   >;
+}
+
+interface LocalDirectoryPickerOptions {
+  mode?: "read" | "readwrite";
+  startIn?: "desktop";
 }
 
 interface ImageJob {
@@ -229,6 +236,7 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const directoryHandleRef = useRef<LocalDirectoryHandle | null>(null);
   const jobsRef = useRef<ImageJob[]>([]);
   const lastRenderedConfig = useRef("");
 
@@ -238,7 +246,7 @@ export default function Home() {
 
   useEffect(() => {
     const pickerWindow = window as unknown as {
-      showDirectoryPicker?: (options?: { mode?: "readwrite" }) => Promise<LocalDirectoryHandle>;
+      showDirectoryPicker?: (options?: LocalDirectoryPickerOptions) => Promise<LocalDirectoryHandle>;
     };
     const timer = window.setTimeout(
       () => setFolderApiAvailable(typeof pickerWindow.showDirectoryPicker === "function"),
@@ -405,7 +413,7 @@ export default function Home() {
   async function chooseFolder() {
     if (processing) return;
     const pickerWindow = window as unknown as {
-      showDirectoryPicker?: (options?: { mode?: "readwrite" }) => Promise<LocalDirectoryHandle>;
+      showDirectoryPicker?: (options?: LocalDirectoryPickerOptions) => Promise<LocalDirectoryHandle>;
     };
 
     if (!pickerWindow.showDirectoryPicker) {
@@ -414,7 +422,10 @@ export default function Home() {
     }
 
     try {
-      const directory = await pickerWindow.showDirectoryPicker({ mode: "readwrite" });
+      const directory = await pickerWindow.showDirectoryPicker({
+        startIn: "desktop",
+        mode: "read",
+      });
       const selected: Array<{ file: File; handle: LocalFileHandle }> = [];
       let ignored = 0;
 
@@ -432,6 +443,7 @@ export default function Home() {
       }
 
       setIgnoredCount(ignored);
+      directoryHandleRef.current = directory;
       setFolderMode(true);
       if (!selected.length) {
         setNotice("这个文件夹中没有可处理的 JPG、PNG 或 WebP 图片。");
@@ -440,7 +452,7 @@ export default function Home() {
       await processFiles(selected);
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
-      setNotice("无法读取这个文件夹，请确认已授予读写权限后重试。");
+      setNotice("无法读取这个文件夹，请确认已授予读取权限后重试。");
     }
   }
 
@@ -450,6 +462,7 @@ export default function Home() {
       .filter((file) => SUPPORTED_TYPES.has(file.type))
       .map((file) => ({ file }));
     setIgnoredCount(files.length - selected.length);
+    directoryHandleRef.current = null;
     setFolderMode(false);
     if (selected.length) await processFiles(selected);
   }
@@ -508,7 +521,32 @@ export default function Home() {
     return () => window.clearTimeout(timer);
   }, [background, jobs.length, processing, targetHeight, targetWidth]);
 
+  async function ensureWritePermission(): Promise<boolean> {
+    const directory = directoryHandleRef.current;
+    if (!directory) return false;
+
+    if ((await directory.queryPermission({ mode: "readwrite" })) === "granted") {
+      return true;
+    }
+
+    return (await directory.requestPermission({ mode: "readwrite" })) === "granted";
+  }
+
   async function saveResults() {
+    if (folderMode) {
+      try {
+        if (!(await ensureWritePermission())) {
+          setShowConfirm(false);
+          setNotice("未获得文件夹编辑权限，没有覆盖任何图片。请再次点击“覆盖原图”并允许编辑。");
+          return;
+        }
+      } catch {
+        setShowConfirm(false);
+        setNotice("无法申请文件夹编辑权限，没有覆盖任何图片。请重新点击“覆盖原图”后重试。");
+        return;
+      }
+    }
+
     setShowConfirm(false);
     let successCount = 0;
     const working = [...jobsRef.current];
@@ -539,7 +577,7 @@ export default function Home() {
           ...job,
           status: "error",
           progress: 100,
-          message: error instanceof Error ? error.message : "保存失败，请重新授权",
+          message: error instanceof Error ? error.message : "保存失败，请确认文件夹编辑权限后重试",
         };
       }
       jobsRef.current = working;

@@ -51,6 +51,12 @@ test("keeps processing local and includes the required safety flow", async () =>
   ]);
 
   assert.match(page, /showDirectoryPicker/);
+  assert.match(page, /startIn:\s*"desktop"/);
+  assert.match(page, /mode:\s*"read"/);
+  assert.match(page, /queryPermission\(\{ mode: "readwrite" \}\)/);
+  assert.match(page, /requestPermission\(\{ mode: "readwrite" \}\)/);
+  assert.doesNotMatch(page, /showDirectoryPicker\(\{ mode: "readwrite"/);
+  assert.doesNotMatch(page, /indexedDB/);
   assert.match(page, /createWritable/);
   assert.match(page, /createImageBitmap/);
   assert.match(page, /await import\("tesseract\.js"\)/);
