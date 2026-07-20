@@ -5,7 +5,8 @@
 ## 在线使用
 
 - GitHub Pages：<https://bigrooo.github.io/Size-modification/>
-- Sites 备用站点：<https://tuzhun-image-checker.zidanebibby.chatgpt.site>
+
+当前公开生产站点为 GitHub Pages。旧 Sites 地址已经失效，不再作为备用入口。
 
 ## 主要功能
 
@@ -35,4 +36,4 @@ npm test
 npm run lint
 ```
 
-`npm run build` 生成 Sites 部署产物；`npm run build:pages` 生成 GitHub Pages 静态产物。推送到 `main` 后，GitHub Actions 会自动更新 Pages 站点。
+`npm run build` 验证 Vinext / Sites 兼容构建；`npm run build:pages` 生成当前生产使用的 GitHub Pages 静态产物。推送到 `main` 后，GitHub Actions 会自动更新 Pages 站点。

@@ -90,11 +90,12 @@ test("keeps processing local and includes the required safety flow", async () =>
 });
 
 test("builds the GitHub Pages app at the repository base path", async () => {
-  const [html, config, workflow, readme, og, icon, appleTouchIcon] = await Promise.all([
+  const [html, config, workflow, readme, agents, og, icon, appleTouchIcon] = await Promise.all([
     readFile(new URL("../dist-pages/index.html", import.meta.url), "utf8"),
     readFile(new URL("../vite.github-pages.config.ts", import.meta.url), "utf8"),
     readFile(new URL("../.github/workflows/deploy-pages.yml", import.meta.url), "utf8"),
     readFile(new URL("../README.md", import.meta.url), "utf8"),
+    readFile(new URL("../AGENTS.md", import.meta.url), "utf8"),
     stat(new URL("../dist-pages/og.png", import.meta.url)),
     stat(new URL("../dist-pages/icon.svg", import.meta.url)),
     stat(new URL("../dist-pages/apple-touch-icon.png", import.meta.url)),
@@ -108,6 +109,9 @@ test("builds the GitHub Pages app at the repository base path", async () => {
   assert.match(workflow, /pages:\s*write/);
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.match(readme, /https:\/\/bigrooo\.github\.io\/Size-modification\//);
+  assert.doesNotMatch(readme, /chatgpt\.site/);
+  assert.match(agents, /GitHub Pages/);
+  assert.match(agents, /npm run build:pages/);
   assert.ok(og.size > 100_000);
   assert.ok(icon.size > 1_000);
   assert.ok(appleTouchIcon.size > 5_000);
