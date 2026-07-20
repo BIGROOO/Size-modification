@@ -11,6 +11,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "图片尺寸与文案检查",
     description: "在浏览器本地统一图片尺寸、识别重复文案，并安全写回原文件夹。",
+    icons: {
+      icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+      apple: [
+        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      ],
+    },
     openGraph: {
       title: "图片尺寸与文案检查",
       description: "本地处理 · 保留原名 · 安全覆盖",

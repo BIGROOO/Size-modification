@@ -38,16 +38,20 @@ test("server-renders the finished image workspace", async () => {
   assert.match(html, /1000 × 1000/);
   assert.match(html, /不上传图片 · 不保存记录/);
   assert.match(html, /property="og:image" content="http:\/\/localhost:3000\/og.png"/);
+  assert.match(html, /rel="icon" href="\/icon.svg"/);
+  assert.match(html, /rel="apple-touch-icon" href="\/apple-touch-icon.png"/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 });
 
 test("keeps processing local and includes the required safety flow", async () => {
-  const [page, layout, css, packageJson, og] = await Promise.all([
+  const [page, layout, css, packageJson, og, icon, appleTouchIcon] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
     stat(new URL("../public/og.png", import.meta.url)),
+    readFile(new URL("../public/icon.svg", import.meta.url), "utf8"),
+    stat(new URL("../public/apple-touch-icon.png", import.meta.url)),
   ]);
 
   assert.match(page, /showDirectoryPicker/);
@@ -71,6 +75,10 @@ test("keeps processing local and includes the required safety flow", async () =>
   assert.match(page, /仍然覆盖/);
   assert.match(page, /MAX_DIMENSION = 8192/);
   assert.match(layout, /\/og\.png/);
+  assert.match(layout, /\/icon\.svg/);
+  assert.match(layout, /\/apple-touch-icon\.png/);
+  assert.match(icon, /aria-label="图片尺寸与文案检查图标"/);
+  assert.ok(appleTouchIcon.size > 5_000);
   assert.match(css, /backdrop-filter:\s*blur\(28px\)/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /prefers-reduced-transparency:\s*reduce/);
@@ -82,19 +90,25 @@ test("keeps processing local and includes the required safety flow", async () =>
 });
 
 test("builds the GitHub Pages app at the repository base path", async () => {
-  const [html, config, workflow, readme, og] = await Promise.all([
+  const [html, config, workflow, readme, og, icon, appleTouchIcon] = await Promise.all([
     readFile(new URL("../dist-pages/index.html", import.meta.url), "utf8"),
     readFile(new URL("../vite.github-pages.config.ts", import.meta.url), "utf8"),
     readFile(new URL("../.github/workflows/deploy-pages.yml", import.meta.url), "utf8"),
     readFile(new URL("../README.md", import.meta.url), "utf8"),
     stat(new URL("../dist-pages/og.png", import.meta.url)),
+    stat(new URL("../dist-pages/icon.svg", import.meta.url)),
+    stat(new URL("../dist-pages/apple-touch-icon.png", import.meta.url)),
   ]);
 
   assert.match(html, /<title>图片尺寸与文案检查<\/title>/);
   assert.match(html, /\/Size-modification\/assets\//);
+  assert.match(html, /href="\/Size-modification\/icon.svg"/);
+  assert.match(html, /href="\/Size-modification\/apple-touch-icon.png"/);
   assert.match(config, /base:\s*"\/Size-modification\/"/);
   assert.match(workflow, /pages:\s*write/);
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.match(readme, /https:\/\/bigrooo\.github\.io\/Size-modification\//);
   assert.ok(og.size > 100_000);
+  assert.ok(icon.size > 1_000);
+  assert.ok(appleTouchIcon.size > 5_000);
 });

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="图片尺寸与文案检查图标">
+  <defs>
+    <linearGradient id="ice" x1="68" y1="42" x2="438" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F9FCFF"/>
+      <stop offset="0.48" stop-color="#DDEEFF"/>
+      <stop offset="1" stop-color="#C9D9FF"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="282" y1="274" x2="382" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#32A6FF"/>
+      <stop offset="1" stop-color="#0067D9"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#ice)"/>
+  <path d="M88 122C88 83.34 119.34 52 158 52h196c38.66 0 70 31.34 70 70v268c0 38.66-31.34 70-70 70H158c-38.66 0-70-31.34-70-70V122Z" fill="#FFFFFF" fill-opacity="0.58"/>
+  <path d="M104 138c0-36.45 29.55-66 66-66h172c36.45 0 66 29.55 66 66v236c0 36.45-29.55 66-66 66H170c-36.45 0-66-29.55-66-66V138Z" fill="#17213A" transform="rotate(-3 256 256)"/>
+  <rect x="156" y="142" width="82" height="82" rx="23" fill="#FFFFFF"/>
+  <rect x="268" y="142" width="82" height="82" rx="23" fill="#FFFFFF" fill-opacity="0.86"/>
+  <rect x="156" y="254" width="82" height="82" rx="23" fill="#FFFFFF" fill-opacity="0.86"/>
+  <rect x="268" y="254" width="82" height="82" rx="23" fill="url(#blue)"/>
+  <path d="m288 296 15 15 29-34" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M139 386h234" stroke="#8BCBFF" stroke-width="12" stroke-linecap="round" opacity="0.9"/>
+</svg>
