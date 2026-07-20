@@ -80,3 +80,21 @@ test("keeps processing local and includes the required safety flow", async () =>
 
   await assert.rejects(access(new URL("../app/_sites-preview", import.meta.url)));
 });
+
+test("builds the GitHub Pages app at the repository base path", async () => {
+  const [html, config, workflow, readme, og] = await Promise.all([
+    readFile(new URL("../dist-pages/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../vite.github-pages.config.ts", import.meta.url), "utf8"),
+    readFile(new URL("../.github/workflows/deploy-pages.yml", import.meta.url), "utf8"),
+    readFile(new URL("../README.md", import.meta.url), "utf8"),
+    stat(new URL("../dist-pages/og.png", import.meta.url)),
+  ]);
+
+  assert.match(html, /<title>图片尺寸与文案检查<\/title>/);
+  assert.match(html, /\/Size-modification\/assets\//);
+  assert.match(config, /base:\s*"\/Size-modification\/"/);
+  assert.match(workflow, /pages:\s*write/);
+  assert.match(workflow, /actions\/deploy-pages@v4/);
+  assert.match(readme, /https:\/\/bigrooo\.github\.io\/Size-modification\//);
+  assert.ok(og.size > 100_000);
+});
